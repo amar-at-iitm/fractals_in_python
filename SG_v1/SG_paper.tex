@@ -1,0 +1,484 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[12pt]{article}
+\usepackage[left=2cm, right=2cm, top=2cm, bottom=2cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\author{}
+\date{}
+
+\begin{document}
+
+\protect\hypertarget{page-0-0}{}{}EI SEVIER
+
+
+\hypertarget{applied-mathematics-and-computation}{%
+\subsubsection{\texorpdfstring{\textbf{Applied Mathematics and
+Computation}}{Applied Mathematics and Computation}}\label{applied-mathematics-and-computation}}
+
+\hypertarget{numerical-solution-of-one-dimensional-sinegordon-equation-using-high-accuracy-multiquadric-quasi-interpolation}{%
+\subsection{Numerical solution of one-dimensional Sine--Gordon equation using high-accuracy multiquadric quasi-interpolation
+★}\label{numerical-solution-of-one-dimensional-sinegordon-equation-using-high-accuracy-multiquadric-quasi-interpolation}}
+
+Zi-Wu Jiang *, Ren-Hong Wang
+
+School of Mathematical Sciences, Dalian University of Technology, Dalian
+116024, PR China \\
+
+E-mail address: zwjiang@yahoo.cn (Z.-W. Jiang).
+
+† This work was supported by the National Natural Science Foundation of China (U0935004, 110 71031, 11001037 and 10801024).
+
+* Corresponding author.
+
+\hypertarget{abstract}{%
+\paragraph{ABSTRACT}\label{abstract}}
+
+In this paper, we propose a numerical scheme to solve the one-dimensional Sine-Gordon equation related to many scientific research topics by using high-accuracy multiquadric quasi-interpolation. We use the derivatives of a multiquadric quasi-interpolant to approximate the spatial derivatives, and a finite difference to approximate the temporal derivative. The advantages of the scheme are that it is meshfree, and in each time step only a multiquadric quasi-interpolant is employed, so that the algorithm is very easy to implement. The accuracy of our scheme is demonstrated by some test problems.
+
+© 2012 Elsevier Inc.~All rights reserved.
+
+\hypertarget{introduction}{%
+\paragraph{1. Introduction}\label{introduction}}
+
+The nonlinear one-dimensional Sine-Gordon (SG) equation
+
+\[\frac{\partial^2 u}{\partial t^2} = \frac{\partial^2 u}{\partial x^2} - \sin(u), \quad a \leqslant x \leqslant b, \ t \geqslant 0, \tag{1}\]
+
+which appear in differential geometry gained its significance because of the collisional behaviors of solitons that arise from these equations.
+This equation appeared in many scientific fields such as the propagation of fluxion in Josephson junctions {[}15{]} between two superconductors, the motion of rigid pendular attached to a stretched wire, solid state physics, nonlinear optics, and dislocations in metals {[}19{]}. This paper is devoted to the numerical solution of equation (1) with the initial conditions
+
+\[u(x,0) = f(x), \quad a \le x \le b,\tag{2}\] 
+
+\[\frac{\partial u}{\partial t}(x,0) = g(x), \quad a \leqslant x \leqslant b,\tag{3}\]
+
+and the boundary conditions
+
+\[u(a,t) = h_1(t), \quad u(b,t) = h_2(t), \quad t \geqslant 0.\tag{4}\]
+
+Since the exact solution of the SG equation can only be obtained in special situations, many numerical schemes are constructed to solve the SG equation. To mention some of them: finite difference schemes {[}3,4,8,11{]}, finite elements method {[}1{]}, and B-spline collocation method {[}16{]} etc. Although the previous methods have been widely used, they usually require the construction and update of a mesh and hence bring inconvenience during computation. To avoid the mesh generation, in recent years, meshless techniques have attracted attention of researchers. Dehghan and Shokri {[}7{]} proposed a numerical scheme to solve one-dimensional SG equation using collocation points and approximating directly the solution using the thin plate splines radial basis function (RBF). Unfortunately, this scheme need to solve a ill-conditional system of linear equations. Ma and Wu {[}13{]} presented a meshless scheme by using a multiquadric (MQ) quasi-interpolation named \(\mathcal{L}_{\mathcal{E}}\) without solving a large-scale linear system of equations, but a polynomial p(x) was needed to improved the accuracy of the scheme. In this paper we developed a meshless approach by directly using high accuracy MQ quasi-interpolation defined on {[}a,b{]} without using any polynomial.
+
+The remainder of this paper is organized as follows: In Section 2, some elementary knowledge about the RBF interpolation and the MQ quasi-interpolation are introduced. In Section 3, we present the numerical techniques by using the high accuracy MQ quasi-interpolation to solve the SG equation. The computational results of the SG equation for some test problems are illustrated, and compared with those obtained with previous results in Section 4.
+
+\hypertarget{rbf-interpolation-and-mq-quasi-interpolation}{%
+\paragraph{2. RBF interpolation and MQ quasi-interpolation}\label{rbf-interpolation-and-mq-quasi-interpolation}}
+
+\hypertarget{rbf-interpolation}{%
+\paragraph{2.1. RBF interpolation}\label{rbf-interpolation}}
+
+RBF was introduced by Krige {[}10{]} in 1951 to deal with geological problem. Hitherto, RBFs were widely used in many fields ({[}6,18{]}, etc). The process of interpolation by using RBF is as follows.
+
+For a given region \(\Omega \in \mathbb{R}^d\) and a set of finite distinct interpolation points
+
+\[X = \{x_1, \ldots, x_N\} \subset \Omega\]
+
+if we are supplied with a function \(f: X \to \mathbb{R}\) , we can construct an interpolant to f in the form:
+
+\[S_{f,X}(x) = \sum_{i=1}^{N} \alpha_j \varphi(\|x - x_j\|), \quad \text{for } x \in \Omega,\tag{5}\]
+
+where \(\|\cdot\|\) denote Euclidean norm, and \(\varphi\) is a certain RBF, say \(\varphi:\mathbb{R}_{\geqslant 0}\to\mathbb{R}\) . The undetermined coefficients \(\{\alpha_1,\ldots,\alpha_N\}\) can be obtained by the linear system
+
+\[\sum_{i=1}^{N} \alpha_j \varphi(\|\mathbf{x}_i - \mathbf{x}_j\|) = f(\mathbf{x}_i), \quad 1 \leqslant i \leqslant N.\tag{6}\]
+
+In this paper, inverse multiquadric (IMQ) RBF is chosen as the RBF mentioned in (5), and the adopted IMQ-RBF has the form:
+
+\[\varphi(r) = \frac{s^2}{(s^2 + r^2)^{3/2}},\tag{7}\]
+
+where \emph{s} is a shape parameter. From {[}14{]}, we know that the linear system (6) have unique solution.
+
+\hypertarget{mq-quasi-interpolation}{%
+\paragraph{2.2. MQ quasi-interpolation}\label{mq-quasi-interpolation}}
+
+Quasi-interpolation of a univariate function \(f:[a,b]\to\mathbb{R}\)
+with MQs on the scattered points
+
+\[a = x_0 < x_1 < \dots < x_n = b, \quad h := \max_{1 \le i \le n} (x_i - x_{i-1}),\tag{8}\]
+
+usually takes the form
+
+\[(\mathcal{M}f)(x) = \sum_{i=0}^{n} f(x_i)\psi_i(x), \tag{9}\]
+
+where \(\psi_i(x)\) is linear combinations of the MQs
+
+\[\phi_i(x) = \sqrt{c^2 + (x - x_i)^2}  \tag{10}\] 
+
+ \[ c \in \mathbb{R}^+ \]is a shape parameter.
+
+In 1988, Buhmann {[}5{]} studied the accuracy of quasi-interpolation operator \(\mathcal{M}\) of a function
+\(f: \mathbb{R} \mapsto \mathbb{R}\) at infinite regular points in \(\mathbb{R}\) and showed that this scheme reproduces linear
+polynomials. Beatson and Powell {[}2{]} proposed three univariate MQ quasi-interpolations, namely, \(\mathcal{L}_{\mathcal{A}}\) , \(\mathcal{L}_{\mathcal{B}}\) , and \(\mathcal{L}_{\mathcal{C}}\) on interval {[}a,b{]}. Wu and Schaback {[}20{]} proposed the univariate quasi-interpolation \(\mathcal{L}_{\mathcal{D}}\) , and proved that the scheme possess preserving monotonicity and linear reproducing property as well as \(\mathcal{O}(h^2)\) error of quasi-interpolant
+\(\mathcal{L}_{\mathcal{D}}f\) in the case of
+\(c^2|\log c|=\mathcal{O}(h^2)\) . Based on Wu and Schaback's work, Ling {[}12{]} proposed a multilevel univariate quasi-interpolation \(\mathcal{L}_{\mathcal{R}}\) , and this scheme can converge with a rate of \(\mathcal{O}(h^{2.5}\log h)\) as \(c=\mathbb{O}(h)\) . To solve SG equation numerically, in this paper we adopt a MQ quasi-interpolation scheme constructed in {[}9{]} using multilevel method, named \(\mathcal{L}_{\mathcal{W}_2}\) .
+
+Next we recall the construction of \(\mathcal{L}_{w_2}\) based on the IMQ-RBF interpolation and the \(\mathcal{L}_{\mathcal{D}}\) operator.
+Given data \(\{(x_i, f_i)\}_{i=0}^n\) , Wu--Schaback's
+\(\mathcal{L}_{\mathcal{D}}\) operator is
+
+\[(\mathcal{L}_{\mathcal{D}})f(x) = \sum_{j=0}^{n} f_j \psi_j(x), \tag{11}\]
+
+where
+
+\[\psi_{0}(x) = \frac{1}{2} + \frac{\phi_{1}(x) - (x - x_{0})}{2(x_{1} - x_{0})}, \\
+\psi_{1}(x) = \frac{\phi_{2}(x) - \phi_{1}(x)}{2(x_{2} - x_{1})} - \frac{\phi_{1}(x) - (x - x_{0})}{2(x_{1} - x_{0})}, \\
+\psi_{n-1}(x) = \frac{(x_{n} - x) - \phi_{n-1}(x)}{2(x_{n} - x_{n-1})} - \frac{\phi_{n-1}(x) - \phi_{n-2}(x)}{2(x_{n-1} - x_{n-2})}, \\
+\psi_{n}(x) = \frac{1}{2} + \frac{\phi_{n-1}(x) - (x_{n} - x)}{2(x_{n} - x_{n-1})}, \\
+\psi_{j}(x) = \frac{\phi_{j+1}(x) - \phi_{j}(x)}{2(x_{j+1} - x_{j})} - \frac{\phi_{j}(x) - \phi_{j-1}(x)}{2(x_{j} - x_{j-1})}, \quad j = 2, \dots, n - 2.\tag{12}\]
+
+Suppose that \(\{x_i\}_{i=0}^n\) are given scattered points, and N is a positive integer satisfying N \textless{} n, then we define an index \(0 < k_1 < k_2 < \cdots < k_N < n\) , and pick a smaller set denoted by
+\(\{x_{k_j}\}_{j=1}^N\) from the given points \(\{x_i\}_{i=0}^n\) . At very point \(x_{k_j}\) of the subset, we define the following value
+
+\[f_{x_{k_j}''}'' = \frac{2\Big[(x_{k_j} - x_{k_j-1})f(x_{k_j+1}) - (x_{k_j+1} - x_{k_j-1})f(x_{k_j}) + (x_{k_j+1} - x_{k_j})f(x_{k_j-1})\Big]}{(x_{k_j} - x_{k_j-1})(x_{k_j+1} - x_{k_j})(x_{k_j+1} - x_{k_j-1})}\,.\]
+
+Based on the smaller set of data
+
+\[\{(x_{k_j}, f_{x_{k_j}}'')\}_{j=1}^N, \quad h_2 := \max_{2 \le j \le N} (x_{k_j} - x_{k_{j-1}}), \tag{13}\]
+
+by using the IMQ-RBF given in (7), a RBF interpolant \(S_{f'',N}\) is obtained, and satisfying
+
+\[S_{f'',N}(x_{k_j}) = f''_{x_{k_i}}, \quad j = 1, \ldots, N.\]
+
+From the above subsection, the interpolant \(S_{f'',N}\) can be expressed as follows
+
+\[S_{f''}(x) = \sum_{i=1}^{N} \alpha_{i} \varphi(\|x - x_{k_{i}}\|), \tag{14}\]
+
+and the coefficients \(\{\alpha_j\}_{j=1}^N\) are uniquely determined by the interpolation condition
+
+\[S_{f''}(\mathbf{x}_{k_i}) = \sum_{j=1}^{N} \alpha_j \varphi(\|\mathbf{x}_{k_i} - \mathbf{x}_{k_j}\|) = f''(\mathbf{x}_{k_i}), \quad i = 1, \dots, N.\tag{15}\]
+
+By using f(x) and the coefficients \(\{\alpha_i\}_{i=1}^N\) mentioned above, a function is constructed in the form
+
+\[e(x) = f(x) - \sum_{j=1}^{N} \alpha_j \sqrt{s^2 + (x - x_{k_j})^2}.\tag{16}\]
+
+Then a MQ quasi-interpolation can be obtained by using
+\(\mathcal{L}_{\mathcal{D}}\) defined by (11) and (12) on the data \(\{x_i, e(x_i)\}_{i=0}^n\) , with the shape parameter c.~Furthermore, the MQ quasi-interpolation operator \(\mathcal{L}_{\mathcal{W}_2}\) is presented as
+
+\[\mathcal{L}_{w_2} f(x) = \sum_{j=1}^{N} \alpha_j \sqrt{s^2 + (x - x_{k_j})^2} + \mathcal{L}_{\mathcal{D}} e(x).\tag{17}\]
+
+Generally speaking, the shape parameters c and s should not be the same constant in (17). Moreover, the linear reproducing property and the high convergence rate of \(\mathcal{L}_{w_2}\) were also studied in {[}17{]}.
+Apparently, in application one can use the second derivative of \((\mathcal{L}_{w_2}f)(x)\)
+
+\[(\mathcal{L}_{\mathcal{W}_2} f)''(x) = \sum_{j=1}^N \alpha_j \varphi(x - x_{k_j}) + \sum_{i=0}^n \left( f(x_i) - \sum_{j=1}^N \alpha_j \sqrt{s^2 + (x_i - x_{k_j})^2} \right) \psi_i''(x),\tag{17A}\]
+where \(x \in [x_0, x_n]\), to approximate \(f''(x)\).
+
+\hypertarget{numerical-scheme-using-mq-quasi-interpolation-mathcall_w_2}{%
+\paragraph[3. Numerical scheme using MQ quasi-interpolation
+\(\mathcal{L}_{w_2}\)]{\texorpdfstring{\protect\hypertarget{page-3-0}{}{}3.
+Numerical scheme using MQ quasi-interpolation \(\mathcal{L}_{w_2}\)}{3. Numerical scheme using MQ quasi-interpolation \textbackslash mathcal\{L\}\_\{w\_2\}}}\label{numerical-scheme-using-mq-quasi-interpolation-mathcall_w_2}}
+
+Now, we present the numerical scheme for solving the SG equation by using the MQ quasi-interpolation \(\mathcal{L}_{w_2}\) . In our method, we use the derivative of the MQ quasi-interpolation to approximate the spatial derivative of the differential equations and employ a first
+order an accurate forward difference to approximate the temporal derivative.
+
+Discretizing the SG equation
+
+\[\frac{\partial^2 u}{\partial t^2} = \frac{\partial^2 u}{\partial x^2} - \sin(u)\]
+
+in time, we get
+
+\[u_k^{n+1} = 2u_k^n - u_k^{n-1} + \tau^2(u_{xx})_k^n - \tau^2 \sin(u_k^n),\]
+
+where \(u_k^n\) is the approximation of the value u(x,t) at
+\((x_k,t_n)\) , \(t_n=n\tau\) , and \(\tau\) is the time step. Because equation (1) is a developmental equation, it is reasonable to employ the finite difference method in the time domain. Then, we use the second derivative of the MQ quasi-interpolation \(\mathcal{L}_{\mathcal{W}}\),
+\(u(x,t_n)\) to approximate \(u_{xx}\) . Thus, the resulting numerical scheme is
+
+\[u_{k}^{n+1} = 2u_{k}^{n} - u_{k}^{n-1} - \tau^{2} \sin(u_{k}^{n}) + \tau^{2} \left[ \sum_{j=1}^{N} \alpha_{j} \varphi(x_{k} - x_{k_{j}}) + \sum_{i=0}^{n} \left( u_{i}^{n} - \sum_{j=1}^{N} \alpha_{j} \sqrt{s^{2} + (x_{i} - x_{k_{j}})^{2}} \right) \psi_{i}''(x_{k}) \right], \tag{18}\]
+
+where \(\varphi\) and \(\psi\) are defined in (7) and (12) respectively, and \(\{\alpha_j\}_{j=1}^N\) is determined by the uniquely solvable linear system
+
+\[\sum_{j=1}^{N} \alpha_{j} \varphi(\|x_{k_{i}} - x_{k_{j}}\|) = \frac{2u_{k_{i}+1}^{n}}{(x_{k_{i}+1} - x_{k_{i}})(x_{k_{i}+1} - x_{k_{i}-1})} + \frac{2u_{k_{i}-1}^{n}}{(x_{k_{i}} - x_{k_{i}-1})(x_{k_{i}+1} - x_{k_{i}-1})} - \frac{2u_{k_{i}}^{n}}{(x_{k_{i}} - x_{k_{i}-1})(x_{k_{i}+1} - x_{k_{i}})}, \quad 1 \leqslant i \leqslant N.\tag{19}\]
+
+
+We iterate this scheme to achieve the numerical solution of (1).
+
+\hypertarget{numerical-example}{%
+\paragraph{4. Numerical example}\label{numerical-example}}
+
+In this section, we test the method by two classical examples. For the sake of simplification, we set
+
+\[x_i = a + \frac{i(b-a)}{n}, \quad i = 0, \ldots, n,\]
+
+and \(N = \frac{n}{K}\) , where K is a positive integer. The choice of
+the interpolation centers \(\{x_{k_j}\}_{j=1}^N\) as follows
+
+\[x_{k_1} = x_1, \quad x_{k_N} = x_{n-1},\]
+
+\[x_{k_j} = a + \frac{(j-1)(b-a)}{N}, \quad j = 2, \dots, N.\]
+
+The accuracy of the proposed method is measured using the
+root-mean-square error (RMS) and \(L_{\infty}\) error norms defined as
+
+\[RMS = \frac{1}{n+1} \sqrt{\sum_{i=0}^{n} |u_i^{\text{exact}} - u_i^{\text{num}}|^2},\]
+
+and
+
+\[L_{\infty} = \max_{0 \le i \le n} |u_i^{\text{exact}} - u_i^{\text{num}}|.\]
+
+\textbf{Example 1.} In this example, we consider SG equation (1) without nonlinear term \(\sin(u)\) in the region \(-1 \le x \le 1\) . The initial conditions are given by
+
+\[u(x, 0) = f(x) = \sin(\pi x),\]
+
+\(u_t(x, 0) = g(x) = 0,\)
+
+with the boundary conditions
+
+\[u(-1,t) = u(1,t) = 0.\]
+
+The analytical solution is given in {[}17{]} as
+
+\[u(x,t) = \frac{1}{2}(\sin(\pi(x+t)) + \sin(\pi(x-t))).\]
+
+The \(L_{\infty}\) errors and RMS errors are obtained in Table 1 for
+\(t=0.25,\ 0.5,\ 0.75\) and 1. The graph of the error function
+\(\widetilde{u}(x,t)-u(x,t)\) for t=1 is given in Fig. 1, where
+\(\widetilde{u}(x,t)\) is the estimated function and u(x,t) is the
+analytical solution.
+
+\protect\hypertarget{page-4-0}{}{}\textbf{Table 1} Computational results
+for Example 1.
+
+\begin{longtable}[]{@{}llll@{}}
+\toprule\noalign{}
+t & \(L_{\infty}\) -error & RMS & Time (s) \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0.25 & \(1.24\times10^{-2}\) & \(6.46\times10^{-4}\) & 0.61 \\
+0.50 & \(5.47\times10^{-2}\) & \(2.71\times10^{-3}\) & 0.64 \\
+0.75 & \(6.14\times10^{-2}\) & \(3.04\times10^{-3}\) & 0.66 \\
+1.00 & \(7.59\times10^{-3}\) & \(3.82\times10^{-4}\) & 0.67 \\
+\end{longtable}
+
+\(L_{\infty}\) and RMS errors, with
+\(c=0.027,\ s=0.8,\ \tau=h=0.01,\ K=8.\)
+
+\includegraphics{images/_page_4_Figure_5.jpeg}
+
+\textbf{Fig. 1.} Error function \(\widetilde{u}(x,t) - u(x,t)\) in t = 1, with dt = dx = 0.01 and K = 8, for Example 1.
+
+\textbf{Table 2} Comparison of \(L_\infty\) and RMS errors between
+\(\mathcal{L}_{\mathcal{E}}\) and \(\mathcal{L}_{\mathcal{W}_2}\)
+schemes.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.0388}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2248}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2558}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2248}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.2558}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+t
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\(L_{\infty}\) error
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+RMS
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+& \(\mathcal{L}_{\mathcal{E}}\) & \(\mathcal{L}_{\mathcal{W}_2}^*\) &
+\(\mathcal{L}_{\mathcal{E}}\) & \(\mathcal{L}_{\mathcal{W}_2}^*\) \\
+0.1 & \(1.54 \times 10^{-6}\) & \(1.31 \times 10^{-5}\) &
+\(7.43 \times 10^{-6}\) & \(3.39\times10^{-7}\) \\
+0.2 & \(4.25\times10^{-5}\) & \(2.50\times10^{-5}\) &
+\(1.76\times10^{-5}\) & \(6.55\times10^{-7}\) \\
+0.3 & \(9.02\times10^{-5}\) & \(3.47\times10^{-5}\) &
+\(3.60\times10^{-5}\) & \(9.29\times10^{-7}\) \\
+0.4 & \(1.62\times10^{-4}\) & \(4.20\times10^{-5}\) &
+\(1.62\times10^{-4}\) & \(1.15\times10^{-6}\) \\
+0.5 & \(2.58\times10^{-4}\) & \(4.68 \times 10^{-5}\) &
+\(1.10 \times 10^{-4}\) & \(1.34\times10^{-6}\) \\
+0.6 & \(3.73 \times 10^{-4}\) & \(6.54\times10^{-5}\) &
+\(1.65\times10^{-4}\) & \(1.55\times10^{-6}\) \\
+0.7 & \(4.98\times10^{-4}\) & \(1.74\times10^{-4}\) &
+\(2.29\times10^{-4}\) & \(2.14\times10^{-6}\) \\
+0.8 & \(6.24\times10^{-4}\) & \(4.01\times10^{-4}\) &
+\(2.98\times10^{-4}\) & \(3.92\times10^{-6}\) \\
+0.9 & \(7.44\times10^{-4}\) & \(8.22\times10^{-4}\) &
+\(3.69 \times 10^{-4}\) & \(7.98\times10^{-6}\) \\
+1.0 & \(8.49\times10^{-4}\) & \(1.53 \times 10^{-3}\) &
+\(4.37\times10^{-4}\) & \(1.56\times10^{-5}\) \\
+\end{longtable}
+
+* denotes that we set K = 10, s = 1.
+
+\textbf{Example 2.} In this example, we compare the accuracy of the MQ quasi-interpolation \(\mathcal{L}_{w_2}\) proposed in this paper to the scheme \(\mathcal{L}_{\mathcal{E}}\) used by Ma and Wu, thus we utilize the same example adopted in {[}13{]}.
+
+We consider SG equation (1) in the domain \(-2 \le x \le 2\) , and the initial conditions are given by
+
+\[u(x, 0) = g(x) = 0,\]
+
+\(u_t(x, 0) = h(x) = 4\operatorname{sech}(x).\)
+
+The analytical solution is
+
+\[u(x, t) = 4 \arctan(\operatorname{sech}(x)t).\]
+
+For comparison, the numerical results are commutated with parameters:
+time step \(\tau=0.01\) , space step h=0.01 and shape parameter \(c=0.1\sqrt[3]{h}\) . Table 2 show the values of \(L_{\infty}\) and RMS errors obtained by using \(\mathcal{L}_{\mathcal{E}}\) and
+\(\mathcal{L}_{\mathcal{W}_2}\) quasi-interpolation schemes, at \(t=0.1,\ 0.2,\ \ldots,\ 1.00\) respectively.
+
+\protect\hypertarget{page-5-0}{}{}From Table 2, we see that the solutions found with \(\mathcal{L}_{w_2}\) scheme is in good agreement with the results obtained by \(\mathcal{L}_{\mathcal{E}}\) scheme in the sense of \(I_{\infty}\) errors, and better than it in the sense of RMS
+errors.
+
+\hypertarget{conclusions}{%
+\paragraph{5. Conclusions}\label{conclusions}}
+
+In this paper, a numerical scheme for the one-dimensional nonlinear Sine--Gordon equation by high accuracy MQ quasiinterpolation \(\mathcal{L}_{\mathcal{W}_2}\) is presented. Form the examples, we can say that the \(\mathcal{L}_{\mathcal{W}_2}\) scheme is feasible and the
+accuracy is better than Ma and Wu's \(\mathcal{L}_{\mathcal{E}}\) scheme in the sense of RMS errors.
+
+For comparison, our technique is used for the non-equidistant grids though we use equidistant grids in our numerical experiments. We see that the present technique requires calculating \(\psi_i(x)\) , \(\psi n_i(x)\) \((i=0,\ldots,n)\) , and the inverse matrix of
+\((\varphi(\|x_{k_i}-x_{k_i}\|))_{N\times N}\) only once.
+
+\hypertarget{references}{%
+\paragraph{References}\label{references}}
+
+\begin{itemize}
+\tightlist
+\item
+  {[}1{]} J. Argyris, M. Haase, J.C. Heinrich, Finite element
+  approximation to two-dimensional Sine--Gordon solutions, Comput.
+  Methods Appl. Mech. Eng. 86 (1991) 1--26.
+\item
+  {[}2{]} R.K. Beatson, M.J.D. Powell, Univariate multiquadric
+  approximation: quasi-interpolation to scattered data, Constr. Approx.
+  8 (1992) 275-288.
+\item
+  {[}3{]} A.G. Bratsos, E.H. Twizell, A family of parametric
+  finite-difference methods for the solution of the Sine-Gordon
+  equation, Appl. Math. Comput. 93 (1998) 117--137.
+\item
+  {[}4{]} A.G. Bratsos, An explicit numerical scheme for the Sine-Gordon  equation in 2+1 dimensions, Appl. Numer. Anal. Comput. Math. 2  (2005) 189-211.
+\item
+  {[}5{]} M.D.~Buhmann, Multivariate interpolation with radial basis  functions, Report DAMTP 1988/NA8, University of Cambridge.
+\item
+  {[}6{]} M.D.~Buhmann, Radial Basis Functions: Theory and
+  Implementations, Cambridge University Press, 2003.
+\item
+  {[}7{]} M. Dehghan, A. Shokri, A numerical method for one-dimensional
+  nonlinear Sine--Gordon equation using collocation and radial basis
+  functions, Numer. Methods Part D. E. 24 (2007) 687--698.
+\item
+  {[}8{]} B.Y. Guo, P.J. Pascual, M.J. Rodriguez, L. Vàzquez, Numerical
+  solution of the Sine-Gordon equation, Appl. Math. Comput. 18 (1986)
+  1-14.
+\item
+  {[}9{]} Z.W. Jiang, R.H. Wang, C.G. Zhu, M. Xu, High accuracy
+  multiquadric quasi-interpolation, Appl. Math. Model. 35 (2011)
+  2185-2195.
+\item
+  {[}10{]} D.G. Krige, A statistical approach to some mine valuation and
+  allied problems on the Witwatersrand, M.Sc. Thesis, University of
+  Witwatersrand, South Africa, 1951.
+\item
+  {[}11{]} J. Kuang, L. Lu, Two classes of finite-difference methods for
+  generalized Sine-Gordon equations, J. Comput. Appl. Math. 31 (1990)
+  389-396.
+\item
+  {[}12{]} L. Ling, A univariate quasi-multiquadric interpolation with
+  better smoothness, Comput. Math. Appl. 48 (2004) 897-912.
+\item
+  {[}13{]} M.L. Ma, Z.M. Wu, A numerical method for one-dimensional
+  nonlinear Sine-Gordon equation using multiquadric quasi-interpolation,
+  Chin. Phys. B 18 (2009) 3099--3103.
+\item
+  {[}14{]} C.A. Micchelli, Interpolation of scattered data: distance
+  matrices and conditionally positive definite functions, Constr.
+  Approx. 2 (1986) 11--22.
+\item
+  {[}15{]} J.K. Perring, T.H. Skyrme, A model unified field equation,
+  Nucl. Phys. 31 (1962) 550-555.
+\item
+  {[}16{]} J. Rashidinia, M. Ghasemia, R. Jalilian, Numerical solution
+  of the nonlinear Klein-Gordon equation, J. Comput. Appl. Math. 233
+  (2010) 1866-1878.
+\item
+  {[}17{]} Y. Wang, B. Wang, High-order multi-symplectic schemes for the
+  nonlinear Klein-Gordon equation, Appl. Math. Comput. 166 (2005)
+  608-632.
+\item
+  {[}18{]} H. Wendland, Scattered Data Approximation, Cambridge
+  Monographs on Applied and Computational Mathematics, vol.~17,
+  Cambridge University Press, Cambridge, 2005.
+\item
+  {[}19{]} G.B. Whitham, Linear and Nonlinear Waves, Wiley-Interscience,
+  NewYork, 1999.
+\item
+  {[}20{]} Z.M. Wu, R. Schaback, Shape preserving properties and
+  convergence of univariate multiquadric quasi-interpolation, Acta Math.
+  Appl. Sin. 10 (4) (1994) 441--446.
+\end{itemize}
+
+\end{document}
