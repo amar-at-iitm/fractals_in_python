@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# WANDB LOG
+PDE_Modeling/wandb
+
 # Distribution / packaging
 .Python
 build/
