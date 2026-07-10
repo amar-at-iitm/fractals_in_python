@@ -20,7 +20,7 @@ b = 1.0
 # h = 0.01
 # tau = 0.01
 ################
-T = 0.25
+T = 0.5
 
 
 
@@ -56,8 +56,8 @@ def classical_optimization():
         raise ValueError("n must be divisible by K because the paper defines N = n / K.")
 
     N = n // K
-    # Nt = int(round(T / tau))
-    Nt = 0
+    Nt = int(round(T / tau))
+    # Nt = 0
 
     x = np.linspace(a, b, n + 1)
 
@@ -77,7 +77,7 @@ def classical_optimization():
             xkj.append(value)
 
     U = np.zeros((Nt + 2, len(x)))
-    U[0, :] = exact_u(x, T)
+    U[0, :] = exact_u(x, 0)
     U[0, 0] = 0.0
     U[0, -1] = 0.0
 
@@ -92,6 +92,25 @@ def classical_optimization():
     U[1, :] = U[0, :] + 0.5 * tau**2 * uxx0
     U[1, 0] = 0.0
     U[1, -1] = 0.0
+
+    #------------------------------------
+    for d in tqdm(range(1, Nt + 1), desc="Time stepping", unit="step"):
+        A = rbf_matrix(xk, s)
+        rhs_d = np.asarray([second_divided_difference(x, U[d], kj) for kj in k_idx])
+        alpha = np.linalg.solve(A, rhs_d)
+
+        uxx = np.zeros(len(x))
+        for i in range( len(x)):
+            uxx[i] = d2_L_W2(i, x, U[d], xk, alpha, s, c)
+
+
+        U[d + 1, :] = 2.0 * U[d, :] - U[d - 1, :] + tau**2 * uxx
+
+        # Dirichlet boundary conditions
+        U[d + 1, 0] = 0.0
+        U[d + 1, -1] = 0.0
+    #-----------------------------------
+
 
     u_num = U[Nt + 1, :]
     u_ex = exact_u(x, T)
@@ -108,7 +127,9 @@ def classical_optimization():
         print(f"New best Linf error: {best_Linf_error}")
         print(f"New best RMS error: {best_RMS_error}")
 
-        with open("best_results.txt", "w") as f:
+        file_name = f"best_results_T_{T}.txt"
+        with open(file_name, "w") as f:
+            f.write(f"At time T={T}:\n")
             f.write(f"Best Linf error: {best_Linf_error}\n")
             f.write(f"Best RMS error: {best_RMS_error}\n")
             f.write(f"Parameters: c={c}, s={s}, K={K}, h={h}, tau={tau}\n")
@@ -130,5 +151,5 @@ def classical_optimization():
 # ---------------------------------------------------
 if __name__ == "__main__":
     sweep_id = wandb.sweep(sweep_config, project="SG_classical_optimization")
-    wandb.agent(sweep_id, function=classical_optimization, count = 10)
+    wandb.agent(sweep_id, function=classical_optimization, count = 100)
     print("Sweep complete")
