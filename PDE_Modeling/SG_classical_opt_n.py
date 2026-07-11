@@ -1,8 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from SG_solver import rbf_matrix, second_divided_difference, d2_L_W2
-
-import os
 from tqdm import tqdm
 
 a = -1.0
@@ -102,7 +99,7 @@ def classical_optimization(c, s, K, h, tau, n, T):
         print(f"New best Linf error: {best_Linf_error}")
         print(f"New best RMS error: {best_RMS_error}")
 
-        file_name = f"Local_best_results_T_{T}.txt"
+        file_name = f"h008_Local_best_results_T_{T}.txt"
         with open(file_name, "w") as f:
             f.write(f"At time T={T}:\n")
             f.write(f"Best Linf error: {best_Linf_error}\n")
@@ -111,27 +108,20 @@ def classical_optimization(c, s, K, h, tau, n, T):
 
 
 
-
-T = 0.25
-
 C = [0.02, 0.027, 0.03, 0.035, 0.04]  # 0.02, 0.025, 0.027,
 S = [0.9, 0.7, 0.8, 0.6]
 k = [4, 5, 8, 10]  #
 H = [0.1, 0.05, 0.02, 0.01]  #
-Tau = [0.01]  # 0.01, 0.008
+Tau = [0.008]  # 0.01, 0.008
 
 time =[0.25, 0.5, 0.75, 1]  # 
-for T in tqdm(time, desc="Time stepping", unit="step"):
+for T in time:
     best_Linf_error = float('inf')
     best_RMS_error = float('inf')
-    print(f"Started Working for T={T}...")
-    for c in tqdm(C, desc="Working for c", unit="value"):
-        print(f"Started Working for c={c}...")
-        for s in tqdm(S, desc="Working for s", unit="value"):
-            print(f"Started Working for s={s}...")     
-            for K in tqdm(k, desc="Working for K", unit="value"):
-                print(f"Started Working for K={K}...")
-                for h in tqdm(H, desc="Working for h", unit="value"):
+    for c in C:
+        for s in S:    
+            for K in k:
+                for h in H:
                     n = round((b - a) / h)
                     if not np.isclose(a + n*h, b):
                         raise ValueError("h must divide b-a exactly.")
@@ -142,6 +132,7 @@ for T in tqdm(time, desc="Time stepping", unit="step"):
                         continue  # Skip this combination if n is not divisible by K
 
 
-                    for tau in tqdm(Tau, desc="Working for tau", unit="value"):
+                    for tau in Tau:
+                        print(f" Working for tau={tau}, K={K}, h={h}, s={s}, c={c}...")
 
                         classical_optimization(c, s, K, h, tau, n, T)
