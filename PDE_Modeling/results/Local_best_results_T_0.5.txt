@@ -1,0 +1,4 @@
+At time T=0.5:
+Best Linf error: 0.031472262618790846
+Best RMS error: 0.02214330812112744
+Parameters: c=0.04, s=0.9, K=4, h=0.02, tau=0.01

@@ -1,0 +1,3 @@
+Best Linf error: 0.00034894189510403795
+Best RMS error: 0.0002461253482070657
+Parameters: c=0.027, s=0.7, K=4, h=0.01, tau=0.01

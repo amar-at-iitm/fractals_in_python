@@ -1,0 +1,5 @@
+At time T=1.0:
+Value of f_alpha: 0.01
+Best Linf error: 0.0004934762499917422
+Best RMS error: 0.00034720840850837405
+Parameters: c=0.035, s=0.8, K=4, h=0.02, tau=0.01
