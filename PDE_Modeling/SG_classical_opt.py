@@ -6,7 +6,7 @@ import os
 import wandb
 from tqdm import tqdm
 
-from class_sweep_config import sweep_config
+from fractals_in_python.extra.class_sweep_config import sweep_config
 
 wandb.login(key="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")
 
