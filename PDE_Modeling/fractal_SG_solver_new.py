@@ -1,17 +1,18 @@
 import numpy as np
-from SG_solver import d2_phi, varphi, error_function 
+from scipy.interpolate import CubicSpline
+from SG_solver import varphi, error_function 
 
 
-def phi(z, c):
+def phi(z, c=0.027):
     return np.sqrt(c**2 + z**2)
 
-def dphi(z, c):
+def dphi(z, c=0.027):
     return z / np.sqrt(c**2 + z**2)
 
-def ddphi(z, c):
+def ddphi(z, c=0.027):
     return c**2 / (c**2 + z**2)**1.5
 
-def H5(z, xN, x1, c):
+def H5(z, x1=-2, xN=2, c=0.027):
     z = np.asarray(z, dtype=float)
     dx = xN - x1
 
@@ -35,7 +36,7 @@ def H5(z, xN, x1, c):
             + h3*dz**3*(z - xN)**2)
 
 
-def H5_dd(z, x1, xN, c):
+def H5_dd(z, x1=-2, xN=2, c=0.027):
     z = np.asarray(z, dtype=float)
     dx = xN - x1
 
@@ -60,15 +61,9 @@ def H5_dd(z, x1, xN, c):
         + h3*(6.0*dz*w**2 + 12.0*dz**2*w + 2.0*dz**3)
     )
 
+#-----------------------------------------------------------------------
 
-
-def build_fractal_second_derivative(
-    x,
-    c,
-    f_alpha,
-    n_points=2000,
-    n_iter=50,
-):
+def build_fractal_second_derivative(x, c, f_alpha, n_iter):
     x = np.asarray(x, dtype=float)
 
     a = x[0]
@@ -76,47 +71,102 @@ def build_fractal_second_derivative(
     N = len(x) - 1
 
     if np.isscalar(f_alpha):
-        f_alpha = np.full(N, f_alpha)
+        f_alpha = np.full(N, f_alpha, dtype=float)
     else:
-        f_alpha = np.asarray(f_alpha)
+        f_alpha = np.asarray(f_alpha, dtype=float)
 
-    partition = np.linspace(a, b, n_points)
-
+    # Start with the base partition
+    partition = np.array([a, b], dtype=float)
     ydd = ddphi(partition, c)
 
     for _ in range(n_iter):
-
-        ydd_new = np.empty_like(ydd)
+        new_parts = []
+        new_vals = []
 
         for k in range(N):
-
             xl = x[k]
             xr = x[k + 1]
 
-            if k < N - 1:
-                mask = (partition >= xl) & (partition < xr)
-            else:
-                mask = (partition >= xl) & (partition <= xr)
+            # Map current partition from [a,b] into [xl,xr]
+            pk = xl + (partition - a) * (xr - xl) / (b - a)
 
-            u = a + (partition[mask] - xl) * (b - a) / (xr - xl)
+            scale = ((b - a) / (xr - xl)) ** 2
 
-            scale = ((b - a)/(xr - xl))**2
+            Hdd = H5_dd(partition, a, b, c)
 
-            ydd_u = np.interp(u, partition, ydd)
+            yk = ddphi(pk, c) + f_alpha[k] * scale * (ydd - Hdd)
 
-            Hdd = H5_dd(u, a, b, c)
+            new_parts.append(pk)
+            new_vals.append(yk)
 
-            ydd_new[mask] = (
-                ddphi(partition[mask], c)
-                + f_alpha[k] * scale * (ydd_u - Hdd)
-            )
+        # Merge all subinterval partitions
+        partition = np.concatenate(new_parts)
+        ydd = np.concatenate(new_vals)
 
-        ydd = ydd_new
+        # Sort and remove duplicates
+        order = np.argsort(partition)
+        partition = partition[order]
+        ydd = ydd[order]
+
+        uniq_partition, uniq_idx = np.unique(partition, return_index=True)
+        partition = uniq_partition
+        ydd = ydd[uniq_idx]
 
     return {
         "partition": partition,
         "values": ydd,
     }
+
+
+# def build_fractal_second_derivative(x, c, f_alpha, n_points=2000, n_iter=50,):
+#     x = np.asarray(x, dtype=float)
+
+#     a = x[0]
+#     b = x[-1]
+#     N = len(x) - 1
+
+#     if np.isscalar(f_alpha):
+#         f_alpha = np.full(N, f_alpha)
+#     else:
+#         f_alpha = np.asarray(f_alpha)
+
+#     partition = np.linspace(a, b, n_points)
+
+#     ydd = ddphi(partition, c)
+
+#     for _ in range(n_iter):
+
+#         ydd_new = np.empty_like(ydd)
+
+#         for k in range(N):
+
+#             xl = x[k]
+#             xr = x[k + 1]
+
+#             if k < N - 1:
+#                 mask = (partition >= xl) & (partition < xr)
+#             else:
+#                 mask = (partition >= xl) & (partition <= xr)
+
+#             u = a + (partition[mask] - xl) * (b - a) / (xr - xl)
+
+#             scale = ((b - a)/(xr - xl))**2
+
+#             ydd_u = np.interp(u, partition, ydd)
+
+#             Hdd = H5_dd(u, a, b, c)
+
+#             ydd_new[mask] = (
+#                 ddphi(partition[mask], c)
+#                 + f_alpha[k] * scale * (ydd_u - Hdd)
+#             )
+
+#         ydd = ydd_new
+
+#     return {
+#         "partition": partition,
+#         "values": ydd,
+#     }
 
 
 
@@ -141,9 +191,86 @@ def build_fractal_second_derivative(
 
 #     return rbf_part + ld_part
 
+#------------------------------------------------------------------------------------
+# pointwise evaluation of the second derivative of the fractal basis function psi_j
+#------------------------------------------------------------------------------------
 
 def d2_fractal_phi_pointwise(z, fractal_dd):
     return np.interp(z, fractal_dd["partition"], fractal_dd["values"])
+
+def d2_fractal_phi_pointwise(z, fractal_dd):
+    p = fractal_dd["partition"]
+    z_arr = np.asarray(z)
+
+    if np.any(z_arr < p[0]) or np.any(z_arr > p[-1]):
+        raise ValueError(
+            f"Point {z} outside interpolation domain [{p[0]}, {p[-1]}]"
+        )
+
+    return np.interp(z, p, fractal_dd["values"])
+
+#----------------------------------------------------------------------------
+# def d2_fractal_phi_pointwise(z, fractal_dd):
+#     p = fractal_dd["partition"]
+#     v = fractal_dd["values"]
+#     z_arr = np.asarray(z)
+
+#     if np.any(z_arr < p[0]) or np.any(z_arr > p[-1]):
+#         raise ValueError(
+#             f"Point {z} outside interpolation domain [{p[0]}, {p[-1]}]"
+#         )
+
+#     spline = CubicSpline(p, v, bc_type='not-a-knot')   # or 'natural', etc.
+#     return spline(z)     # scalar in, scalar out; array in, array out
+
+#----------------------------------------------------------------------------
+# def d2_fractal_phi_pointwise(z, fractal_dd, k=2, atol=1e-12):
+ 
+#     p = fractal_dd["partition"]
+#     v = fractal_dd["values"]
+
+#     # ---- 0. Domain check ---------------------------------------------------
+#     if z < p[0] - atol or z > p[-1] + atol:
+#         raise ValueError(f"Point {z} outside interpolation domain "
+#                          f"[{p[0]}, {p[-1]}]")
+
+#     # ---- 1. Binary search for insertion index ------------------------------
+#     idx = np.searchsorted(p, z)
+
+#     # ---- 2. Exact-hit short-circuit ---------------------------------------
+#     # Check left neighbour (idx-1) and right neighbour (idx) for equality
+#     if idx < len(p) and abs(z - p[idx]) < atol:
+#         return float(v[idx])
+#     if idx > 0 and abs(z - p[idx-1]) < atol:
+#         return float(v[idx-1])
+
+#     # ---- 3. Build small window [i0 : i1)  ----------------------------------
+#     # Want at least (2k) neighbours; shift window if we are near an edge
+#     i0 = max(0, idx - k)               # left inclusive
+#     i1 = min(len(p), idx + k + 1)      # right exclusive
+#     # If we clipped at an edge, enlarge the other side so that we still
+#     # have at least 4 points (important for a cubic fit).
+#     while i1 - i0 < 4:
+#         if i0 == 0:
+#             i1 += 1
+#         elif i1 == len(p):
+#             i0 -= 1
+#         else:  # both sides available – extend the shorter
+#             if idx - i0 < i1 - idx:
+#                 i0 -= 1
+#             else:
+#                 i1 += 1
+
+#     xs = p[i0:i1]
+#     ys = v[i0:i1]
+
+#     # ---- 4. Local cubic spline and evaluation ------------------------------
+#     # With 4 points the result is the exact polynomial segment that a
+#     # full natural spline would give in this interval.
+#     spline_local = CubicSpline(xs, ys, bc_type="natural")
+#     return float(spline_local(z))
+
+#----------------------------------------------------------------------------
 
 def d2_fractal_psi(a, j, x, fractal_dd):
     """Second derivative of the fractal basis function psi_j."""
@@ -199,7 +326,6 @@ def d2_fractal_psi(a, j, x, fractal_dd):
 
 
 def d2_fractal_L_W2(i, x, f, xk, alpha, s, fractal_dd):
-    #               i, x, f, xk, alpha, s, c
     xx = x[i]
 
     rbf_part = 0.0
